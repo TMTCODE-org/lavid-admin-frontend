@@ -9,7 +9,7 @@ import {
 export interface Bill {
   id: string;
   pack?: Pack;
-  user?: User;
+  owner?: User;
   status: BillStatus;
   dateBought: Date;
   activationDate?: Date;
@@ -34,7 +34,7 @@ export const convertJsonToBill = (json: any): Bill => {
         roi: 0,
         image: ''
       } as Pack,
-      user: {
+      owner: {
         id: 'No ID',
         username: 'No Username',
         email: 'No Email',
@@ -64,7 +64,7 @@ export const convertJsonToBill = (json: any): Bill => {
   return {
     id: json.id ?? 'No ID',
     pack: convertJsonToPack(json.pack),
-    user: jsonUserToUser(json.user),
+    owner: jsonUserToUser(json.owner),
     status: convertJsonToBillStatus(json.status),
     dateBought: new Date(json.dateBought) ?? new Date(),
     activationDate: new Date(json.activationDate) ?? new Date(),
