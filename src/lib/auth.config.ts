@@ -34,7 +34,7 @@ const authConfig = {
     strategy: 'jwt'
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         if (user) {
           token = {
@@ -49,10 +49,15 @@ const authConfig = {
         }
       }
 
+      if (account) {
+        token.accessToken = account.access_token;
+      }
+
       return token;
     },
     async session({ session, token }) {
       session.user = token.user as any;
+      session.token = token.accessToken as string;
       return session;
     }
   },

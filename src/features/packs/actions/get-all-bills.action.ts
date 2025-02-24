@@ -5,7 +5,7 @@ import { axiosInstance } from '@/lib/axios-instance';
 
 export const getAllBills = async () => {
   try {
-    const response = await axiosInstance.get('/bills/dashboard');
+    const response = await axiosInstance.get('/bills/dashboard?limit=30');
     if (!response.data) {
       return [];
     }
@@ -16,9 +16,6 @@ export const getAllBills = async () => {
 
     return convertJsonToArrayBill(response.data);
   } catch (error) {
-    console.log({
-      error
-    });
     return [];
   }
 };

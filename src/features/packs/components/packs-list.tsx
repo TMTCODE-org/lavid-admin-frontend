@@ -33,10 +33,14 @@ import { BillStatusEnum } from '@/features/bills/entity/bill-status.entity';
 import { Bill } from '@/features/bills/entity/bill.entity';
 import { useBills } from '../hooks/useBills';
 import Image from 'next/image';
+import { useActiveBill } from '../hooks/useActiveBill';
+import { useRefuseBill } from '../hooks/useRefuseBill';
 
 export default function PacksList() {
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const { billsQuery } = useBills();
+  const { activeBillMutation } = useActiveBill();
+  const { refuseBillMutation } = useRefuseBill();
 
   const bills = billsQuery.data || [];
 
@@ -57,14 +61,12 @@ export default function PacksList() {
     }
   };
 
-  const handleAccept = (bill: Bill) => {
-    // Aquí iría la lógica para aceptar el bill
-    console.log('Bill aceptado:', bill);
+  const handleAccept = async (bill: Bill) => {
+    await activeBillMutation.mutateAsync(bill);
   };
 
-  const handleReject = (bill: Bill) => {
-    // Aquí iría la lógica para rechazar el bill
-    console.log('Bill rechazado:', bill);
+  const handleReject = async (bill: Bill) => {
+    await refuseBillMutation.mutateAsync(bill);
   };
 
   return (
@@ -224,15 +226,25 @@ export default function PacksList() {
                             />
                           </div>
 
-                          <div className='flex justify-end space-x-2'>
+                          <div className='mt-4 flex justify-end space-x-2'>
                             <Button
                               onClick={() => handleAccept(selectedBill)}
                               variant='default'
+                              disabled={
+                                bill.status.value == BillStatusEnum.REFUSED ||
+                                bill.status.value == BillStatusEnum.ACTIVE ||
+                                activeBillMutation.isPending ||
+                                refuseBillMutation.isPending
+                              }
                             >
                               <Check className='mr-2 h-4 w-4' />
                               Aceptar
                             </Button>
                             <Button
+                              disabled={
+                                activeBillMutation.isPending ||
+                                refuseBillMutation.isPending
+                              }
                               onClick={() => handleReject(selectedBill)}
                               variant='destructive'
                             >
