@@ -11,7 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -32,6 +32,7 @@ const defaultValues = {
 type UserFormValue = z.infer<typeof formSchema>;
 
 export default function UserAuthForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
 
@@ -43,13 +44,26 @@ export default function UserAuthForm() {
   });
 
   const onSubmit = async (data: UserFormValue) => {
-    startTransition(() => {
-      signIn('credentials', {
+    startTransition(async () => {
+      const response = await signIn('credentials', {
         email: data.email,
         password: data.password,
-        callbackUrl: callbackUrl ?? '/dashboard'
+        callbackUrl: callbackUrl ?? '/dashboard',
+        redirect: false
       });
+
+      if (response?.code === 'invalid_credentials') {
+        toast.error('Invalid credentials');
+        return;
+      }
+
+      if (response?.error) {
+        toast.error(response.error);
+        return;
+      }
+
       toast.success('Signed In Successfully!');
+      router.push(callbackUrl ?? '/dashboard');
     });
   };
 

@@ -8,10 +8,15 @@ import authConfig from '@/lib/auth.config';
 const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
+  // if (req.auth && req.nextUrl.pathname.startsWith('/')) {
+  //   const url = req.url.replace(req.nextUrl.pathname, '/dashboard');
+  //   return Response.redirect(url);
+  // }
+
   if (!req.auth) {
     const url = req.url.replace(req.nextUrl.pathname, '/');
     return Response.redirect(url);
   }
 });
 
-export const config = { matcher: ['/dashboard/:path*'] };
+export const config = { matcher: ['/dashboard/:path*', '/'] };

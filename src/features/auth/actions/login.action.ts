@@ -1,3 +1,5 @@
+'use server';
+
 import { jsonUserToUserWithRefreshToken } from '@/features/users/entities/user.entity';
 import { axiosInstance } from '@/lib/axios-instance';
 
