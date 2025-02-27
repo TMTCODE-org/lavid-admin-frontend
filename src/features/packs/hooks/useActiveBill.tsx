@@ -13,7 +13,11 @@ export const useActiveBill = () => {
   const activeBillMutation = useMutation({
     mutationKey: ['bills', 'activate'],
     mutationFn: async (bill: Bill) => {
-      return await activeBill(bill.id, data?.token as string);
+      return await activeBill(
+        bill.id,
+        bill.owner?.id ?? '',
+        data?.token as string
+      );
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
