@@ -1,5 +1,6 @@
 import PageContainer from '@/components/layout/page-container';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { redirect } from 'next/navigation';
 import React from 'react';
 
 export default function OverViewLayout({
@@ -13,6 +14,8 @@ export default function OverViewLayout({
   bar_stats: React.ReactNode;
   area_stats: React.ReactNode;
 }) {
+  redirect('/dashboard/packs');
+
   return (
     <PageContainer>
       <div className='flex flex-1 flex-col space-y-2'>
