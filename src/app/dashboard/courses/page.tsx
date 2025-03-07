@@ -60,104 +60,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
-
-// Tipos
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  offPrice?: number;
-  category: string;
-  averageRating: number;
-  totalReviews: number;
-  totalStudents: number;
-  createdBy: string;
-  image: string;
-  totalDuration: string;
-  createdAt: string;
-  updatedAt: string;
-  language: string;
-  instructor: string;
-  introVideoUrl?: string;
-  downloadLink?: string;
-  pdfUrl?: string;
-  pack: string;
-  orderNumber: number;
-}
-
-// Datos de ejemplo
-const initialCourses: Course[] = [
-  {
-    id: '1',
-    title: 'Desarrollo Web Completo',
-    description: 'Aprende desarrollo web desde cero hasta nivel avanzado',
-    price: 199.99,
-    offPrice: 149.99,
-    category: 'Desarrollo Web',
-    averageRating: 4.8,
-    totalReviews: 245,
-    totalStudents: 1250,
-    createdBy: 'admin@example.com',
-    image: '/placeholder.svg?height=150&width=250',
-    totalDuration: '42h 30m',
-    createdAt: '2023-01-15',
-    updatedAt: '2023-06-20',
-    language: 'Español',
-    instructor: 'Juan Pérez',
-    introVideoUrl: 'https://example.com/intro-video',
-    downloadLink: 'https://example.com/download',
-    pdfUrl: 'https://example.com/pdf',
-    pack: 'Premium',
-    orderNumber: 1
-  },
-  {
-    id: '2',
-    title: 'Diseño UX/UI Profesional',
-    description: 'Domina las técnicas de diseño de experiencia de usuario',
-    price: 149.99,
-    offPrice: 99.99,
-    category: 'Diseño',
-    averageRating: 4.6,
-    totalReviews: 189,
-    totalStudents: 980,
-    createdBy: 'admin@example.com',
-    image: '/placeholder.svg?height=150&width=250',
-    totalDuration: '35h 15m',
-    createdAt: '2023-02-10',
-    updatedAt: '2023-07-05',
-    language: 'Español',
-    instructor: 'María González',
-    introVideoUrl: 'https://example.com/intro-video-2',
-    downloadLink: 'https://example.com/download-2',
-    pdfUrl: 'https://example.com/pdf-2',
-    pack: 'Básico',
-    orderNumber: 2
-  },
-  {
-    id: '3',
-    title: 'Marketing Digital Avanzado',
-    description: 'Estrategias avanzadas de marketing digital para negocios',
-    price: 179.99,
-    offPrice: 129.99,
-    category: 'Marketing',
-    averageRating: 4.7,
-    totalReviews: 210,
-    totalStudents: 1100,
-    createdBy: 'admin@example.com',
-    image: '/placeholder.svg?height=150&width=250',
-    totalDuration: '38h 45m',
-    createdAt: '2023-03-05',
-    updatedAt: '2023-08-15',
-    language: 'Español',
-    instructor: 'Carlos Rodríguez',
-    introVideoUrl: 'https://example.com/intro-video-3',
-    downloadLink: 'https://example.com/download-3',
-    pdfUrl: 'https://example.com/pdf-3',
-    pack: 'Pro',
-    orderNumber: 3
-  }
-];
+import { Course } from '@/features/courses/entities/course.entity';
+import { useGetCourses } from '@/features/courses/hooks/useGetCourses';
+import Image from 'next/image';
+import PageContainer from '@/components/layout/page-container';
 
 // Categorías de ejemplo
 const categories = [
@@ -179,325 +85,180 @@ const packs = ['Básico', 'Premium', 'Pro', 'Enterprise'];
 const languages = ['Español', 'Inglés', 'Francés', 'Alemán', 'Portugués'];
 
 export default function CoursesManagement() {
-  const [courses, setCourses] = useState<Course[]>(initialCourses);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentCourse, setCurrentCourse] = useState<Course | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Estado para el formulario
-  const [formData, setFormData] = useState<Partial<Course>>({
-    title: '',
-    description: '',
-    price: 0,
-    offPrice: 0,
-    category: '',
-    image: '',
-    totalDuration: '',
-    language: '',
-    instructor: '',
-    introVideoUrl: '',
-    downloadLink: '',
-    pdfUrl: '',
-    pack: '',
-    orderNumber: 0
-  });
+  const { getCoursesQuery } = useGetCourses();
 
-  // Filtrar cursos por término de búsqueda
-  const filteredCourses = courses.filter(
-    (course) =>
-      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.instructor.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Manejar cambios en el formulario
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]:
-        name === 'price' || name === 'offPrice' || name === 'orderNumber'
-          ? Number.parseFloat(value) || 0
-          : value
-    });
-  };
-
-  // Manejar cambios en los selects
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
-  // Abrir formulario para crear nuevo curso
-  const handleCreateNew = () => {
-    setIsEditing(false);
-    setCurrentCourse(null);
-    setFormData({
-      title: '',
-      description: '',
-      price: 0,
-      offPrice: 0,
-      category: '',
-      image: '',
-      totalDuration: '',
-      language: '',
-      instructor: '',
-      introVideoUrl: '',
-      downloadLink: '',
-      pdfUrl: '',
-      pack: '',
-      orderNumber: courses.length + 1
-    });
-    setDialogOpen(true);
-  };
-
-  // Abrir formulario para editar curso
-  const handleEdit = (course: Course) => {
-    setIsEditing(true);
-    setCurrentCourse(course);
-    setFormData({
-      title: course.title,
-      description: course.description,
-      price: course.price,
-      offPrice: course.offPrice,
-      category: course.category,
-      image: course.image,
-      totalDuration: course.totalDuration,
-      language: course.language,
-      instructor: course.instructor,
-      introVideoUrl: course.introVideoUrl,
-      downloadLink: course.downloadLink,
-      pdfUrl: course.pdfUrl,
-      pack: course.pack,
-      orderNumber: course.orderNumber
-    });
-    setDialogOpen(true);
-  };
-
-  // Guardar curso (crear o actualizar)
-  const handleSave = () => {
-    if (isEditing && currentCourse) {
-      // Actualizar curso existente
-      setCourses(
-        courses.map((course) =>
-          course.id === currentCourse.id
-            ? {
-                ...course,
-                ...formData,
-                updatedAt: new Date().toISOString().split('T')[0]
-              }
-            : course
-        )
-      );
-    } else {
-      // Crear nuevo curso
-      const newCourse: Course = {
-        id: Date.now().toString(),
-        title: formData.title || 'Nuevo Curso',
-        description: formData.description || '',
-        price: formData.price || 0,
-        offPrice: formData.offPrice,
-        category: formData.category || 'Sin categoría',
-        averageRating: 0,
-        totalReviews: 0,
-        totalStudents: 0,
-        createdBy: 'admin@example.com',
-        image: formData.image || '/placeholder.svg?height=150&width=250',
-        totalDuration: formData.totalDuration || '0h 0m',
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0],
-        language: formData.language || 'Español',
-        instructor: formData.instructor || '',
-        introVideoUrl: formData.introVideoUrl,
-        downloadLink: formData.downloadLink,
-        pdfUrl: formData.pdfUrl,
-        pack: formData.pack || 'Básico',
-        orderNumber: formData.orderNumber || courses.length + 1
-      };
-      setCourses([...courses, newCourse]);
-    }
-    setDialogOpen(false);
-  };
-
-  // Eliminar curso
-  const handleDelete = (id: string) => {
-    setCourses(courses.filter((course) => course.id !== id));
-  };
+  const courses = getCoursesQuery.data || [];
 
   return (
-    <div className='container mx-auto py-6'>
-      <Card>
-        <CardHeader className='flex flex-row items-center justify-between'>
-          <div>
-            <CardTitle>Gestión de Cursos</CardTitle>
-            <CardDescription>
-              Administra todos los cursos de la plataforma
-            </CardDescription>
-          </div>
-          <Button onClick={handleCreateNew}>
-            <Plus className='mr-2 h-4 w-4' />
-            Nuevo Curso
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className='mb-6'>
-            <div className='relative'>
-              <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
-              <Input
-                placeholder='Buscar cursos...'
-                className='pl-8'
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+    <PageContainer>
+      <div className='container mx-auto py-6'>
+        <Card>
+          <CardHeader className='flex flex-row items-center justify-between'>
+            <div>
+              <CardTitle>Gestión de Cursos</CardTitle>
+              <CardDescription>
+                Administra todos los cursos de la plataforma
+              </CardDescription>
             </div>
-          </div>
-
-          <div className='rounded-md border'>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Imagen</TableHead>
-                  <TableHead>Título</TableHead>
-                  <TableHead>Categoría</TableHead>
-                  <TableHead>Precio</TableHead>
-                  <TableHead>Instructor</TableHead>
-                  <TableHead>Pack</TableHead>
-                  <TableHead>Valoración</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCourses.length === 0 ? (
+            <Button onClick={() => {}}>
+              <Plus className='mr-2 h-4 w-4' />
+              Nuevo Curso
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className='rounded-md border'>
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell
-                      colSpan={8}
-                      className='py-8 text-center text-muted-foreground'
-                    >
-                      No se encontraron cursos
-                    </TableCell>
+                    <TableHead>Imagen</TableHead>
+                    <TableHead>Título</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead>Precio</TableHead>
+                    <TableHead>Instructor</TableHead>
+                    <TableHead>Pack</TableHead>
+                    <TableHead>Valoración</TableHead>
+                    <TableHead>Acciones</TableHead>
                   </TableRow>
-                ) : (
-                  filteredCourses.map((course) => (
-                    <TableRow key={course.id}>
-                      <TableCell>
-                        <img
-                          src={course.image || '/placeholder.svg'}
-                          alt={course.title}
-                          className='h-12 w-20 rounded-md object-cover'
-                        />
-                      </TableCell>
-                      <TableCell className='font-medium'>
-                        {course.title}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant='outline'>{course.category}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className='flex flex-col'>
-                          {course.offPrice ? (
-                            <>
-                              <span className='text-muted-foreground line-through'>
-                                ${course.price}
-                              </span>
-                              <span className='font-medium'>
-                                ${course.offPrice}
-                              </span>
-                            </>
-                          ) : (
-                            <span>${course.price}</span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>{course.instructor}</TableCell>
-                      <TableCell>
-                        <Badge>{course.pack}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className='flex items-center'>
-                          <Star className='mr-1 h-4 w-4 fill-yellow-500 text-yellow-500' />
-                          <span>{course.averageRating}</span>
-                          <span className='ml-1 text-muted-foreground'>
-                            ({course.totalReviews})
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className='flex space-x-2'>
-                          <Button
-                            variant='outline'
-                            size='icon'
-                            onClick={() => handleEdit(course)}
-                          >
-                            <Edit className='h-4 w-4' />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant='outline'
-                                size='icon'
-                                className='text-destructive'
-                              >
-                                <Trash2 className='h-4 w-4' />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  ¿Estás seguro?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Esta acción no se puede deshacer. Se eliminará
-                                  permanentemente el curso &quot;{course.title}
-                                  &quot;.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction
-                                  className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
-                                  onClick={() => handleDelete(course.id)}
-                                >
-                                  Eliminar
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
+                </TableHeader>
+                <TableBody>
+                  {courses.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={8}
+                        className='py-8 text-center text-muted-foreground'
+                      >
+                        No se encontraron cursos
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  ) : (
+                    courses.map((course) => (
+                      <TableRow key={course.id}>
+                        <TableCell>
+                          <Image
+                            src={course.image || '/placeholder.svg'}
+                            alt={course.title}
+                            width={200}
+                            height={200}
+                            className='h-12 w-20 rounded-md object-cover'
+                          />
+                        </TableCell>
+                        <TableCell className='font-medium'>
+                          {course.title}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant='outline'>
+                            {course.category.name}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className='flex flex-col'>
+                            {course.offPrice ? (
+                              <>
+                                <span className='text-muted-foreground line-through'>
+                                  ${course.price}
+                                </span>
+                                <span className='font-medium'>
+                                  ${course.offPrice}
+                                </span>
+                              </>
+                            ) : (
+                              <span>${course.price}</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {course.instructor.firstName}{' '}
+                          {course.instructor.lastName}{' '}
+                        </TableCell>
+                        <TableCell>
+                          <Badge>{course.pack.title}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className='flex items-center'>
+                            <Star className='mr-1 h-4 w-4 fill-yellow-500 text-yellow-500' />
+                            <span>{course.averageRating}</span>
+                            <span className='ml-1 text-muted-foreground'>
+                              ({course.totalReviews})
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className='flex space-x-2'>
+                            <Button
+                              variant='outline'
+                              size='icon'
+                              onClick={() => {}}
+                            >
+                              <Edit className='h-4 w-4' />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant='outline'
+                                  size='icon'
+                                  className='text-destructive'
+                                >
+                                  <Trash2 className='h-4 w-4' />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    ¿Estás seguro?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Esta acción no se puede deshacer. Se
+                                    eliminará permanentemente el curso &quot;
+                                    {course.title}
+                                    &quot;.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>
+                                    Cancelar
+                                  </AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                                    onClick={() => {}}
+                                  >
+                                    Eliminar
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
 
-          <div className='flex items-center justify-end space-x-2 py-4'>
-            <Button variant='outline' size='sm'>
-              <ChevronLeft className='h-4 w-4' />
-            </Button>
-            <Button variant='outline' size='sm'>
-              1
-            </Button>
-            <Button variant='outline' size='sm'>
-              2
-            </Button>
-            <Button variant='outline' size='sm'>
-              3
-            </Button>
-            <Button variant='outline' size='sm'>
-              <ChevronRight className='h-4 w-4' />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            <div className='flex items-center justify-end space-x-2 py-4'>
+              <Button variant='outline' size='sm'>
+                <ChevronLeft className='h-4 w-4' />
+              </Button>
+              <Button variant='outline' size='sm'>
+                1
+              </Button>
+              <Button variant='outline' size='sm'>
+                2
+              </Button>
+              <Button variant='outline' size='sm'>
+                3
+              </Button>
+              <Button variant='outline' size='sm'>
+                <ChevronRight className='h-4 w-4' />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Diálogo para crear/editar curso */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        {/* Diálogo para crear/editar curso */}
+        {/* <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className='max-h-[90vh] max-w-3xl overflow-y-auto'>
           <DialogHeader>
             <DialogTitle>
@@ -754,7 +515,8 @@ export default function CoursesManagement() {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
-    </div>
+      </Dialog> */}
+      </div>
+    </PageContainer>
   );
 }
