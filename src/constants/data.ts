@@ -16,6 +16,10 @@ export const navItems: NavItem[] = [
   {
     title: 'Packs',
     url: '/dashboard/packs'
+  },
+  {
+    title: 'Courses',
+    url: '/dashboard/courses'
   }
   // {
   //   title: 'Dashboard',
