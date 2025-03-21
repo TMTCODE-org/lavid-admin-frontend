@@ -34,10 +34,13 @@ export interface Course {
   updatedAt: Date;
 }
 
-export type CreateCourse = Omit<
-  Course,
-  'id' | 'createdAt' | 'updatedAt' | 'prevId' | 'instructor' | 'createdBy'
->;
+export type CreateCourse = ExtractIds<
+  Pick<Course, 'category' | 'language' | 'pack'>
+> &
+  Omit<
+    Course,
+    'id' | 'createdAt' | 'updatedAt' | 'prevId' | 'instructor' | 'createdBy'
+  >;
 
 export const convertJsonToCourse = (json: any): Course => {
   if (!json || Object.keys(json).length === 0) {

@@ -1,3 +1,5 @@
+'use server';
+
 import { axiosInstance } from '@/lib/axios-instance';
 import { mapToLanguage } from '../entities/language.entity';
 

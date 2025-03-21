@@ -1,3 +1,5 @@
+'use server';
+
 import { axiosInstance } from '@/lib/axios-instance';
 import { mapToCategory } from '../entities/category.entity';
 

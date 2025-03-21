@@ -43,7 +43,9 @@ const authConfig = {
               id: user.id,
               email: user.email,
               username: user.username,
-              avatar: user.avatar
+              avatar: user.avatar,
+              token: user.token,
+              lastName: user.lastName
             }
           };
         }
