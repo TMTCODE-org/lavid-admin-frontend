@@ -20,6 +20,10 @@ export const navItems: NavItem[] = [
   {
     title: 'Courses',
     url: '/dashboard/courses'
+  },
+  {
+    title: 'Users',
+    url: '/dashboard/users'
   }
   // {
   //   title: 'Dashboard',
