@@ -12,8 +12,7 @@ import {
   UserPlus,
   Eye,
   Edit,
-  UserX,
-  UserCheck
+  Trash2
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -62,45 +61,38 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
 
-// Tipos
-interface UserRole {
-  name: string;
-}
-
-interface UserData {
-  id: string;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  isActive: boolean;
-  avatar?: string;
-  createdAt: string;
-  phoneNumber?: string;
-  skill?: string;
-  bio?: string;
-  socialMedia?: string;
-  roles: UserRole[];
-}
+import { User } from '../entities/user.entity';
+import { useGetAllUsers } from '../hooks/useGetAllUsers';
 
 export function UsersList() {
-  const [users, setUsers] = useState<UserData[]>([]);
+  const { userQuery } = useGetAllUsers();
+
+  const users = userQuery.data || [];
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userDetailsOpen, setUserDetailsOpen] = useState(false);
 
-  // Filtrar usuarios
   const filteredUsers = users.filter((user) => {
-    // Filtro por estado
     const matchesStatus =
       statusFilter === 'all' ||
       (statusFilter === 'active' && user.isActive) ||
       (statusFilter === 'inactive' && !user.isActive);
 
-    // Filtro por rol
     const matchesRole =
       roleFilter === 'all' ||
       user.roles.some(
@@ -110,38 +102,16 @@ export function UsersList() {
     return matchesStatus && matchesRole;
   });
 
-  // Formatear fecha
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(date);
-  };
-
-  // Obtener iniciales para el avatar
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  // Ver detalles del usuario
-  const handleViewDetails = (user: UserData) => {
+  const handleViewDetails = (user: User) => {
     setSelectedUser(user);
     setUserDetailsOpen(true);
   };
 
-  // Cambiar estado del usuario (activar/desactivar)
-  const handleToggleStatus = (userId: string) => {
-    setUsers(
-      users.map((user) =>
-        user.id === userId ? { ...user, isActive: !user.isActive } : user
-      )
-    );
-  };
-
-  // Renderizar tarjeta de usuario para vista móvil
-  const renderUserCard = (user: UserData) => (
+  const renderUserCard = (user: User) => (
     <Card key={user.id} className='mb-4'>
       <CardContent className='p-0'>
         <div className='flex items-start p-4'>
@@ -204,20 +174,43 @@ export function UsersList() {
                     <Edit className='mr-2 h-4 w-4' />
                     Editar
                   </DropdownMenuItem>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem
+                        onSelect={(e) => {}}
+                        className='text-destructive'
+                      >
+                        <Trash2 className='mr-2 h-4 w-4' />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción no se puede deshacer. Se eliminará
+                          permanentemente el usuario
+                          <span className='font-semibold'>
+                            {' '}
+                            {user.firstName} {user.lastName}
+                          </span>{' '}
+                          (@{user.username}).
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => {}}>
+                          Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          // onClick={handleDeleteUser}
+                          className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                        >
+                          Eliminar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleToggleStatus(user.id)}>
-                    {user.isActive ? (
-                      <>
-                        <UserX className='mr-2 h-4 w-4' />
-                        Desactivar
-                      </>
-                    ) : (
-                      <>
-                        <UserCheck className='mr-2 h-4 w-4' />
-                        Activar
-                      </>
-                    )}
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -337,7 +330,13 @@ export function UsersList() {
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.phoneNumber || '-'}</TableCell>
-                      <TableCell>{formatDate(user.createdAt)}</TableCell>
+                      <TableCell>
+                        {Intl.DateTimeFormat('es-PE', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        }).format(user.createdAt)}
+                      </TableCell>
                       <TableCell>
                         <div className='flex flex-wrap gap-1'>
                           {user.roles.map((role, index) => (
@@ -393,24 +392,48 @@ export function UsersList() {
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant='ghost'
-                                  size='icon'
-                                  onClick={() => handleToggleStatus(user.id)}
-                                >
-                                  {user.isActive ? (
-                                    <UserX className='h-4 w-4' />
-                                  ) : (
-                                    <UserCheck className='h-4 w-4' />
-                                  )}
-                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant='ghost'
+                                      size='icon'
+                                      className='text-destructive hover:text-destructive'
+                                      onClick={() => {}}
+                                    >
+                                      <Trash2 className='h-4 w-4' />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        ¿Estás seguro?
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Esta acción no se puede deshacer. Se
+                                        eliminará permanentemente el usuario
+                                        <span className='font-semibold'>
+                                          {' '}
+                                          {user.firstName} {user.lastName}
+                                        </span>{' '}
+                                        (@{user.username}).
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel onClick={() => {}}>
+                                        Cancelar
+                                      </AlertDialogCancel>
+                                      <AlertDialogAction
+                                        // onClick={handleDeleteUser}
+                                        className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                                      >
+                                        Eliminar
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>
-                                  {user.isActive
-                                    ? 'Desactivar usuario'
-                                    : 'Activar usuario'}
-                                </p>
+                                <p>Eliminar usuario</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -534,7 +557,11 @@ export function UsersList() {
                       </p>
                       <p className='flex items-center'>
                         <Calendar className='mr-2 h-4 w-4 text-muted-foreground' />
-                        {formatDate(selectedUser.createdAt)}
+                        {Intl.DateTimeFormat('es-PE', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        }).format(selectedUser.createdAt)}
                       </p>
                     </div>
 
@@ -562,7 +589,7 @@ export function UsersList() {
                       </p>
                       <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
                         {Object.entries(
-                          JSON.parse(selectedUser.socialMedia)
+                          JSON.parse(JSON.stringify(selectedUser.socialMedia))
                         ).map(([key, value]) => (
                           <div key={key} className='flex items-center'>
                             <span className='mr-2 capitalize'>{key}:</span>
@@ -591,14 +618,6 @@ export function UsersList() {
                             : 'La cuenta está desactivada y no puede acceder a la plataforma'}
                         </p>
                       </div>
-                      <Button
-                        variant={
-                          selectedUser.isActive ? 'destructive' : 'default'
-                        }
-                        onClick={() => handleToggleStatus(selectedUser.id)}
-                      >
-                        {selectedUser.isActive ? 'Desactivar' : 'Activar'}
-                      </Button>
                     </div>
                   </div>
                 </TabsContent>

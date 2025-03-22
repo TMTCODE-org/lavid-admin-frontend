@@ -2,6 +2,10 @@ import {
   Bill,
   convertJsonToArrayBill
 } from '@/features/bills/entity/bill.entity';
+import {
+  convertListJsonToRoles,
+  Role
+} from '@/features/roles/entities/role.entity';
 
 export interface User {
   id: string;
@@ -18,6 +22,7 @@ export interface User {
   socialMedia?: Record<string, string>;
   referrerCode?: string;
   bills: Bill[];
+  roles: Role[];
 }
 
 export type CreateUser = Omit<
@@ -60,7 +65,8 @@ export const jsonUserToUser = (jsonUser: any): User => {
       bio: 'No Bio',
       phoneNumber: 'No Phone Number',
       socialMedia: {},
-      bills: []
+      bills: [],
+      roles: []
     };
   }
 
@@ -78,6 +84,7 @@ export const jsonUserToUser = (jsonUser: any): User => {
     phoneNumber: jsonUser.phoneNumber || '',
     socialMedia: jsonUser.socialMedia || {},
     referrerCode: jsonUser.referrerCode,
-    bills: convertJsonToArrayBill(jsonUser.bills)
+    bills: convertJsonToArrayBill(jsonUser.bills),
+    roles: convertListJsonToRoles(jsonUser.roles)
   };
 };
