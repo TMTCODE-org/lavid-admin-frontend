@@ -81,7 +81,6 @@ export function UsersList() {
 
   const users = userQuery.data || [];
 
-  const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -95,9 +94,13 @@ export function UsersList() {
 
     const matchesRole =
       roleFilter === 'all' ||
-      user.roles.some(
-        (role) => role.name.toLowerCase() === roleFilter.toLowerCase()
-      );
+      user.roles.some((role) => {
+        console.log({
+          role
+        });
+
+        return role.name.toLowerCase() === roleFilter.toLowerCase();
+      });
 
     return matchesStatus && matchesRole;
   });
@@ -258,7 +261,7 @@ export function UsersList() {
                   <SelectContent>
                     <SelectItem value='all'>Todos los roles</SelectItem>
                     <SelectItem value='admin'>Admin</SelectItem>
-                    <SelectItem value='instructor'>Instructor</SelectItem>
+                    <SelectItem value='user'>Usuario</SelectItem>
                     <SelectItem value='student'>Estudiante</SelectItem>
                   </SelectContent>
                 </Select>
@@ -495,10 +498,51 @@ export function UsersList() {
                     {getInitials(selectedUser.firstName, selectedUser.lastName)}
                   </AvatarFallback>
                 </Avatar>
-                <div className='text-center sm:text-left'>
-                  <h2 className='text-xl font-bold'>
-                    {selectedUser.firstName} {selectedUser.lastName}
-                  </h2>
+                <div className='flex-1 text-center sm:text-left'>
+                  <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between'>
+                    <h2 className='text-xl font-bold'>
+                      {selectedUser.firstName} {selectedUser.lastName}
+                    </h2>
+                    <div className='mt-2 sm:mt-0'>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant='destructive'
+                            size='sm'
+                            onClick={() => {}}
+                          >
+                            <Trash2 className='mr-2 h-4 w-4' />
+                            Eliminar Usuario
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta acción no se puede deshacer. Se eliminará
+                              permanentemente el usuario
+                              <span className='font-semibold'>
+                                {' '}
+                                {selectedUser.firstName} {selectedUser.lastName}
+                              </span>{' '}
+                              (@{selectedUser.username}).
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel onClick={() => {}}>
+                              Cancelar
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              // onClick={handleDeleteUser}
+                              className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                            >
+                              Eliminar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
                   <p className='text-muted-foreground'>
                     @{selectedUser.username}
                   </p>

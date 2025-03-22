@@ -46,9 +46,8 @@ export const useCreateCourseForm = () => {
   const createCourseMutation = useMutation({
     mutationKey: ['courses', 'create'],
     mutationFn: async (data: z.infer<typeof CreateCourseSchema>) => {
-      const course = await createCourse(data, session?.user?.token!);
-
-      return course;
+      // const course = await createCourse(data, session?.user?.token!);
+      // return course;
     }
   });
 
