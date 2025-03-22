@@ -76,9 +76,11 @@ import {
 
 import { User } from '../entities/user.entity';
 import { useGetAllUsers } from '../hooks/useGetAllUsers';
+import { useDeleteUser } from '../hooks/useDeleteUser';
 
 export function UsersList() {
   const { userQuery } = useGetAllUsers();
+  const { deleteUserMutation } = useDeleteUser();
 
   const users = userQuery.data || [];
 
@@ -96,10 +98,6 @@ export function UsersList() {
     const matchesRole =
       roleFilter === 'all' ||
       user.roles.some((role) => {
-        console.log({
-          role
-        });
-
         return role.name.toLowerCase() === roleFilter.toLowerCase();
       });
 
@@ -113,6 +111,10 @@ export function UsersList() {
   const handleViewDetails = (user: User) => {
     setSelectedUser(user);
     setUserDetailsOpen(true);
+  };
+
+  const onDeleteUser = (id: string) => {
+    deleteUserMutation.mutate(id);
   };
 
   const renderUserCard = (user: User) => (
@@ -206,7 +208,8 @@ export function UsersList() {
                           Cancelar
                         </AlertDialogCancel>
                         <AlertDialogAction
-                          // onClick={handleDeleteUser}
+                          onClick={() => onDeleteUser(user.id)}
+                          disabled={deleteUserMutation.isPending}
                           className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
                         >
                           Eliminar
@@ -427,7 +430,8 @@ export function UsersList() {
                                         Cancelar
                                       </AlertDialogCancel>
                                       <AlertDialogAction
-                                        // onClick={handleDeleteUser}
+                                        onClick={() => onDeleteUser(user.id)}
+                                        disabled={deleteUserMutation.isPending}
                                         className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
                                       >
                                         Eliminar
@@ -534,7 +538,8 @@ export function UsersList() {
                               Cancelar
                             </AlertDialogCancel>
                             <AlertDialogAction
-                              // onClick={handleDeleteUser}
+                              onClick={() => onDeleteUser(selectedUser.id)}
+                              disabled={deleteUserMutation.isPending}
                               className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
                             >
                               Eliminar
