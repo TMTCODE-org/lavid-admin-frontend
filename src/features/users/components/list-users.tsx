@@ -12,7 +12,8 @@ import {
   UserPlus,
   Eye,
   Edit,
-  Trash2
+  Trash2,
+  ExternalLink
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -455,7 +456,7 @@ export function UsersList() {
               <span className='font-medium'>{filteredUsers.length}</span> de{' '}
               <span className='font-medium'>{users.length}</span> usuarios
             </div>
-            <div className='flex items-center space-x-2'>
+            {/* <div className='flex items-center space-x-2'>
               <Button variant='outline' size='icon' className='h-8 w-8'>
                 <ChevronLeft className='h-4 w-4' />
               </Button>
@@ -471,7 +472,7 @@ export function UsersList() {
               <Button variant='outline' size='icon' className='h-8 w-8'>
                 <ChevronRight className='h-4 w-4' />
               </Button>
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>
@@ -626,23 +627,16 @@ export function UsersList() {
                     </div>
                   )}
 
-                  {selectedUser.socialMedia && (
+                  {/* {selectedUser.socialMedia && (
                     <div className='space-y-1'>
                       <p className='text-sm font-medium text-muted-foreground'>
                         Redes Sociales
                       </p>
                       <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
-                        {Object.entries(
-                          JSON.parse(JSON.stringify(selectedUser.socialMedia))
-                        ).map(([key, value]) => (
-                          <div key={key} className='flex items-center'>
-                            <span className='mr-2 capitalize'>{key}:</span>
-                            <span className='text-sm'>{String(value)}</span>
-                          </div>
-                        ))}
+                        {Object.values(selectedUser.socialMedia)}
                       </div>
                     </div>
-                  )}
+                  )} */}
                 </TabsContent>
 
                 <TabsContent value='activity' className='mt-4'>

@@ -70,6 +70,9 @@ export const jsonUserToUser = (jsonUser: any): User => {
     };
   }
 
+  const likeRoles = jsonUser.roles ?? [];
+  const roles = likeRoles.map((role: any) => role.role);
+
   return {
     id: jsonUser.id || '',
     username: jsonUser.username || 'No Username',
@@ -85,6 +88,6 @@ export const jsonUserToUser = (jsonUser: any): User => {
     socialMedia: jsonUser.socialMedia || {},
     referrerCode: jsonUser.referrerCode,
     bills: convertJsonToArrayBill(jsonUser.bills),
-    roles: convertListJsonToRoles(jsonUser.roles)
+    roles: convertListJsonToRoles(roles)
   };
 };
